@@ -193,13 +193,14 @@ WORKDIR /onepg
 # Install application deps.
 # I was in a hurry this can't possibly be the best way
 RUN set -xe; \
-    export PATH="$(gem env gempath | sed 's|\(.gem/ruby/\)\([0-9].[0-9].[0-9]\):|\1\2/bin:|g'):$PATH"; \
-    export GEM_HOME="$(gem env gemhome)"; \
+    for path in $(gem env gempath | sed 's|:| |g'); do export PATH="$path/bin:$PATH";done; \
     gem install bundler --user-install; \
     yes | mix local.hex; \
     yes | mix local.rebar; \
     cd make_the_page; \
-    bundle install;
+    bundle install; \
+    cd elixir_version; \
+    mix deps.get;
 
 # Set the entrypoint.
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
